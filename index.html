@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>URL Shortener</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        input, button { padding: 10px; margin: 5px 0; }
+        input { width: 100%; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; }
+        #result { margin-top: 20px; padding: 10px; background: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <h1>URL Shortener</h1>
+    <input type="url" id="longurl" placeholder="Enter your long URL">
+    <button onclick="shortenUrl()">Shorten URL</button>
+    <div id="result"></div>
+
+    <script>
+        async function shortenUrl() {
+            const longUrl = document.getElementById('longurl').value;
+            if (!longUrl) return;
+            
+            const response = await fetch('YOUR_APPS_SCRIPT_URL', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'longurl=' + encodeURIComponent(longUrl)
+            });
+            
+            const data = await response.json();
+            const shortUrl = window.location.href + '?u=' + data.shorturl;
+            
+            document.getElementById('result').innerHTML = `
+                Short URL: <a href="${shortUrl}" target="_blank">${shortUrl}</a>
+            `;
+        }
+
+        // Redirect if short URL is accessed
+        const params = new URLSearchParams(window.location.search);
+        const shortUrl = params.get('u');
+        
+        if (shortUrl) {
+            fetch('YOUR_APPS_SCRIPT_URL?shorturl=' + shortUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.url) {
+                        window.location.href = data.url;
+                    } else {
+                        document.body.innerHTML = '<h1>URL not found</h1>';
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
